@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>生日快乐</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #FFFFFF; /* 纯白色背景 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: sans-serif;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent; /* 移动端去掉点击高亮 */
+        }
+
+        #text-container {
+            position: absolute;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.5);
+            /* 忽然冒出来，然后停住等待点击 */
+            animation: popUp 1.5s ease-out forwards;
+            z-index: 10;
+        }
+
+        .main-text {
+            font-size: 12vw; /* 适配手机的字体大小 */
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .sub-text {
+            font-size: 5vw; /* 提示文字的字体大小 */
+            font-weight: normal;
+            color: #666666;
+            margin-top: 15px;
+            opacity: 0;
+            /* 延迟一点出现，在主文字冒出来之后 */
+            animation: fadeInSub 1s ease-in forwards;
+            animation-delay: 1.5s; 
+        }
+
+        /* 针对电脑屏幕稍微调整字体 */
+        @media (min-width: 768px) {
+            .main-text { font-size: 8vw; }
+            .sub-text { font-size: 2vw; margin-top: 25px; }
+        }
+
+        @keyframes popUp {
+            0% { opacity: 0; transform: scale(0.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fadeInSub {
+            0% { opacity: 0; }
+            100% { opacity: 0.8; }
+        }
+
+        /* 点击后整体消失的动画 */
+        .fade-out {
+            animation: fadeOut 1.5s ease-in-out forwards !important;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.2); }
+        }
+
+        #video-container {
+            width: 100%;
+            height: 100%;
+            display: none; /* 初始隐藏 */
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            background-color: #FFFFFF;
+        }
+
+        /* 视频渐显 */
+        .fade-in {
+            display: flex !important;
+            animation: fadeIn 1.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* 保证视频比例正确，且不被裁切 */
+            outline: none;
+            background-color: #FFFFFF;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="text-container">
+        <div class="main-text">祝你生日快乐</div>
+        <div class="sub-text">点击继续</div>
+    </div>
+
+    <div id="video-container">
+        <!-- 增加 playsinline 和 webkit-playsinline 以完美支持 iOS 移动端播放 -->
+        <video id="main-video" playsinline webkit-playsinline></video>
+    </div>
+
+    <script>
+        const textContainer = document.getElementById('text-container');
+        const videoContainer = document.getElementById('video-container');
+        const videoElement = document.getElementById('main-video');
+
+        const videos = [
+            "ScreenRecording_05-02-2026 下午5-52-54_1.mov",
+            "ScreenRecording_05-02-2026 下午5-53-42_1.mov"
+        ];
+        let currentVideoIndex = 0;
+        let hasStarted = false;
+
+        document.body.addEventListener('click', () => {
+            if (hasStarted) return; // 防止重复点击
+            hasStarted = true;
+
+            // 文字开始消失
+            textContainer.classList.add('fade-out');
+
+            // 在文字消失的过程中（稍微延迟一点点），开始展示视频并播放
+            setTimeout(() => {
+                videoContainer.classList.add('fade-in');
+                
+                // 加载第一个视频并播放
+                videoElement.src = videos[currentVideoIndex];
+                videoElement.play();
+            }, 600); // 延迟600毫秒，让文字先开始消失，然后视频渐显
+
+            // 等文字完全消失后，将其从视图中彻底隐藏，防止遮挡
+            setTimeout(() => {
+                textContainer.style.display = 'none';
+            }, 1500); 
+        });
+
+        // 监听当前视频播放结束事件
+        videoElement.addEventListener('ended', () => {
+            // 切换到下一个视频的索引
+            currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+            // 更改视频源并自动播放
+            videoElement.src = videos[currentVideoIndex];
+            videoElement.play();
+        });
+    </script>
+</body>
+</html>
